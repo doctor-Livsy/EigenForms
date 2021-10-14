@@ -5,13 +5,14 @@ from PyQt5.QtCore import pyqtSignal
 import bdf_reading
 from multiprocessing import freeze_support
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(333, 355)
-        MainWindow.setMinimumSize(QtCore.QSize(333, 355))
-        MainWindow.setMaximumSize(QtCore.QSize(333, 355))
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+
+class UiMainWindow(object):
+    def setup_ui(self, main_window):
+        main_window.setObjectName("MainWindow")
+        main_window.resize(333, 355)
+        main_window.setMinimumSize(QtCore.QSize(333, 355))
+        main_window.setMaximumSize(QtCore.QSize(333, 355))
+        self.centralwidget = QtWidgets.QWidget(main_window)
         self.centralwidget.setMinimumSize(QtCore.QSize(300, 355))
         self.centralwidget.setMaximumSize(QtCore.QSize(340, 355))
         palette = QtGui.QPalette()
@@ -215,7 +216,7 @@ class Ui_MainWindow(object):
         self.status_label.setMaximumSize(QtCore.QSize(260, 20))
         self.status_label.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.status_label.setText("")
-        self.status_label.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.status_label.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.status_label.setObjectName("status_label")
         self.gridLayout_2.addWidget(self.status_label, 0, 0, 1, 1)
         self.progressBar = QtWidgets.QProgressBar(self.status_box)
@@ -256,7 +257,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.deformmultipler = QtWidgets.QLabel(self.widget)
         self.deformmultipler.setMaximumSize(QtCore.QSize(120, 100))
-        self.deformmultipler.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.deformmultipler.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.deformmultipler.setObjectName("deformmultipler")
         self.horizontalLayout.addWidget(self.deformmultipler)
         self.def_spinbox = QtWidgets.QSpinBox(self.widget)
@@ -272,7 +273,7 @@ class Ui_MainWindow(object):
         self.scale.setObjectName("scale")
         self.newscale = QtWidgets.QLabel(self.widget)
         self.newscale.setMaximumSize(QtCore.QSize(100, 100))
-        self.newscale.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.newscale.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.newscale.setObjectName("newscale")
         self.scale.addWidget(self.newscale)
         self.scale_spinbox = QtWidgets.QDoubleSpinBox(self.widget)
@@ -289,7 +290,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.dpi = QtWidgets.QLabel(self.widget)
         self.dpi.setMaximumSize(QtCore.QSize(100, 100))
-        self.dpi.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.dpi.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.dpi.setObjectName("dpi")
         self.horizontalLayout_2.addWidget(self.dpi)
         self.dpi_spinBox = QtWidgets.QSpinBox(self.widget)
@@ -304,12 +305,12 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addLayout(self.verticalLayout_2)
         self.gridLayout_5.addWidget(self.param, 1, 0, 1, 1)
         self.canceled = 0
-        MainWindow.setCentralWidget(self.centralwidget)
+        main_window.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslate_ui(main_window)
+        QtCore.QMetaObject.connectSlotsByName(main_window)
 
-    def retranslateUi(self, MainWindow):
+    def retranslate_ui(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "EigenForms"))
         self.selectfiles.setTitle(_translate("MainWindow", "Select files"))
@@ -328,11 +329,9 @@ class Ui_MainWindow(object):
         self.newscale.setText(_translate("MainWindow", "View scale"))
         self.dpi.setText(_translate("MainWindow", "Picture DPI"))
 
-
     def status_update(self, number, percent):
         self.progressBar.setValue(percent)
         self.status_label.setText(f' mode № {number} created.')
-
 
     def status_start(self):
         self.selectfiles.setEnabled(False)
@@ -340,7 +339,6 @@ class Ui_MainWindow(object):
         self.OK.setEnabled(False)
         self.progressBar.setValue(0)
         self.status_label.setText('Start of creating images...')
-
 
     def status_end(self):
         if self.canceled != 1:
@@ -352,50 +350,48 @@ class Ui_MainWindow(object):
         self.param.setEnabled(True)
         self.selectfiles.setEnabled(True)
 
-
     def set_canceled(self, a):
         self.canceled = a
 
 
-class my_signals(QtCore.QObject):
-
-    signal_update = pyqtSignal(int,int)
+class MySignals(QtCore.QObject):
+    signal_update = pyqtSignal(int, int)
     signal_start = pyqtSignal()
     signal_end = pyqtSignal()
-
 
     def emit_update(self, number, percent):
         self.signal_update.emit(number, percent)
 
-
     def emit_start(self):
         self.signal_start.emit()
 
-
     def emit_end(self):
         self.signal_end.emit()
+
 
 def thread(my_func):
     """
     Запускает функцию в отдельном потоке
     """
+
     def wrapper():
         my_thread = threading.Thread(target=my_func, name='bdf_reading')
         my_thread.setDaemon(True)
         my_thread.start()
+
     return wrapper
 
 
-def get_file(object_to_paste, file_mask = '*.*'):
+def get_file(object_to_paste, file_mask='*.*'):
     def wrapper():
         file_name = QtWidgets.QFileDialog.getOpenFileName(filter=file_mask)
         object_to_paste.setText(str(file_name[0]))
+
     return wrapper
 
 
 @thread
 def go_to_main():
-
     op2_name = ui.lineEdit_op2.text()
     bdf_name = ui.lineEdit_bdf.text()
     deform_multipler = ui.def_spinbox.value()
@@ -411,9 +407,9 @@ def go_to_main():
         swap = 3
 
     ui.set_canceled(0)
-    my_signals.emit_start()
-    bdf_reading.main(op2_name, bdf_name, deform_multipler, coef_scale, dpi, swap, my_signals,  exit_thread)
-    my_signals.emit_end()
+    MySignals.emit_start()
+    bdf_reading.main(op2_name, bdf_name, deform_multipler, coef_scale, dpi, swap, MySignals, exit_thread)
+    MySignals.emit_end()
     exit_thread.clear()
 
 
@@ -431,9 +427,9 @@ if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    my_signals = my_signals()
+    ui = UiMainWindow()
+    ui.setup_ui(MainWindow)
+    my_signals = MySignals()
     my_signals.signal_update.connect(ui.status_update)
     my_signals.signal_start.connect(ui.status_start)
     my_signals.signal_end.connect(ui.status_end)
@@ -446,5 +442,3 @@ if __name__ == "__main__":
     ui.OK.clicked.connect(go_to_main)
     ui.Cancel.clicked.connect(prog_exit)
     sys.exit(app.exec_())
-
-

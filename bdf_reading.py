@@ -9,15 +9,17 @@ from pyNastran.op2.op2 import OP2
 import multiprocessing
 import warnings
 import matplotlib.cbook
-warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
 
-class counter:
+warnings.filterwarnings("ignore", category=matplotlib.cbook.mplDeprecation)
+
+
+class Counter:
     count = []
 
     def __init__(self, arg=None):
-        if arg!=None and len(self.count) == 0:
+        if arg is not None and len(self.count) == 0:
             self.count.append(arg)
-        elif arg != None and len(self.count) != 0:
+        elif arg is not None and len(self.count) != 0:
             self.count[0] = arg
             pass
 
@@ -26,7 +28,7 @@ class counter:
         return self.count[0]
 
 
-class ui_update:
+class UiUpdate:
     SIG = []
 
     def __init__(self, signals=None):
@@ -37,10 +39,9 @@ class ui_update:
 
 
 def status_bar(modes_count, mode_number):
+    percent = round(Counter().append() / modes_count * 100)
 
-    percent = round(counter().append() / modes_count * 100)
-
-    ui_update().SIG[0].emit_update(mode_number, percent)
+    UiUpdate().SIG[0].emit_update(mode_number, percent)
 
 
 def main(op2_name, bdf_name,
@@ -65,11 +66,11 @@ def main(op2_name, bdf_name,
     """
 
     # Инициализация классов
-    ui_update(signals)
-    counter(0)
+    UiUpdate(signals)
+    Counter(0)
 
     print("Reading Nastran files...")
-    if stop.is_set() != True:
+    if stop.is_set() is not True:
         # Отсортированные QUAD4 и TRIA3 элемнты из BDF файла
         shell_elm = reading_bdf(bdf_name)
         phi = get_theta(shell_elm)
@@ -91,15 +92,15 @@ def main(op2_name, bdf_name,
     target_cpu = cpu_count // 2 if cpu_count > 1 else cpu_count
 
     # Создание обратной связи с потоками
-    Pipes = []
-    Pipes = [multiprocessing.Pipe() for i in range(len(eig.data))]
+    pipes = []
+    pipes = [multiprocessing.Pipe() for i in range(len(eig.data))]
 
     # Подготовка входных аргументов по каждой форме для  get_mode_pict()
     all_args = [(eig.node_gridtype, eig.data[i], elm_grids, elm_nondef_coords,
-                eig.modes[i], (round(eig.mode_cycles[i], 3)), deform_multipler,
-                coef_scale, swap, dpi, Pipes[i][1], phi) for i in range(len(eig.data))]
+                 eig.modes[i], (round(eig.mode_cycles[i], 3)), deform_multipler,
+                 coef_scale, swap, dpi, pipes[i][1], phi) for i in range(len(eig.data))]
 
-    if stop.is_set() != True:
+    if stop.is_set() is not True:
         # Создание пула процессов, их разбивка по потокам и асинхронный запуск
         with multiprocessing.Pool(processes=target_cpu) as pool:
             [pool.apply_async(get_mode_pict, args) for args in all_args]
@@ -107,8 +108,8 @@ def main(op2_name, bdf_name,
             # Возврат статуса о готовности +
             # механизм остановки при нажатии cancel
             for i in range(len(eig.data)):
-                if stop.is_set() != True:
-                    status_bar(len(eig.data), Pipes[i][0].recv())
+                if stop.is_set() is not True:
+                    status_bar(len(eig.data), pipes[i][0].recv())
                 else:
                     break
                     pool.close()
@@ -116,9 +117,8 @@ def main(op2_name, bdf_name,
                     pool.join()
 
 
-def get_mode_pict(node_gridtype, mode, elm_grids, elm_nondef_coords,mode_number,
+def get_mode_pict(node_gridtype, mode, elm_grids, elm_nondef_coords, mode_number,
                   m_cycle, deform_multipler, coef_scale, swap, dpi, child_p, phi):
-
     eig_increments = {}
     print(f"Creating {mode_number}")
     # Формирование списка перемещений узлов для собственной формы
@@ -147,7 +147,6 @@ def get_mode_pict(node_gridtype, mode, elm_grids, elm_nondef_coords,mode_number,
 
 
 def reading_op2(op2_name):
-
     op2 = OP2()
 
     # Чтение OP2 и BDF
@@ -161,7 +160,6 @@ def reading_op2(op2_name):
 
 
 def reading_bdf(bdf_name):
-
     bdf = BDF()
 
     # Чтение BDF
@@ -174,7 +172,6 @@ def reading_bdf(bdf_name):
 
 
 def get_theta(shell_elm):
-
     list_theta = {}
     for id in shell_elm:
         for node in shell_elm[id].nodes_ref:
@@ -189,7 +186,7 @@ def get_theta(shell_elm):
                     temp_cartesian = (node.xyz - node.cd_ref.origin) @ node.cd_ref.global_to_local
                     list_theta[node.nid] = get_angles(temp_cartesian, 'S')
                 else:
-                    list_theta[node.nid] = [node.xyz[0], node.xyz[1]] ### При надобности подправить индексы
+                    list_theta[node.nid] = [node.xyz[0], node.xyz[1]]  # При надобности подправить индексы
 
     return list_theta.copy()
 
@@ -268,7 +265,6 @@ def get_cartesian(coord, type):
 
 
 def get_angles(coord, type):
-
     tc = SkyCoord(x=coord[0], y=coord[1],
                   z=coord[2],
                   unit=('mm', 'mm', 'mm'),
@@ -342,11 +338,11 @@ def get_elm_def_coords(elm_coord, nodes_increments, deform_multipler, swap, phi)
             if node.cd_ref.Type == 'S':
                 theta = phi[node.nid] * np.pi / 180
                 rz = np.array([[np.cos(theta), np.sin(theta), 0],
-                              [-np.sin(theta), np.cos(theta), 0],
-                              [0, 0, 1]])
+                               [-np.sin(theta), np.cos(theta), 0],
+                               [0, 0, 1]])
                 rx = np.array([[0, 0, 1],
-                              [0, np.cos(theta), np.sin(theta)],
-                              [0, -np.sin(theta), np.cos(theta)]])
+                               [0, np.cos(theta), np.sin(theta)],
+                               [0, -np.sin(theta), np.cos(theta)]])
                 r = rz @ rx
                 r_inv = np.linalg.inv(r)
                 rot_eig_incr = r_inv @ eig_incr
@@ -368,7 +364,6 @@ def rep_coord(coords, comp1, to_comp2):
 
 
 def replace_coordinates(coords, swap):
-
     if swap == 1:
         comp, to_comp = 0, 1
     elif swap == 2:
@@ -429,10 +424,9 @@ def get_coord_limits(lst_np):
     :return:
     """
     all_coords = np.concatenate(lst_np, axis=0)
-    maxmin = []
-    maxmin.append([all_coords[:, 0].min(), all_coords[:, 0].max()])
-    maxmin.append([all_coords[:, 1].min(), all_coords[:, 1].max()])
-    maxmin.append([all_coords[:, 2].min(), all_coords[:, 2].max()])
+    maxmin = [[all_coords[:, 0].min(), all_coords[:, 0].max()],
+              [all_coords[:, 1].min(), all_coords[:, 1].max()],
+              [all_coords[:, 2].min(), all_coords[:, 2].max()]]
     return maxmin
 
 
@@ -468,7 +462,6 @@ def get_plot_aratio(fig, grid_spec):
 
 
 def plot_subplot(ax, elements, facecolor=None, edgecolor=None, transparency=None, linewidth=None):
-
     plotted_elm = a3.art3d.Poly3DCollection(elements)
     ax.add_collection3d(plotted_elm)
 
@@ -539,4 +532,5 @@ def plot_elements(eig_disp, def_disp, eig_descript, coef_scale):
         ax.grid(False)
         ax.set_axis_off()
 
-    return fig 
+    return fig
+
